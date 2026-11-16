@@ -3,6 +3,7 @@
 // 첫 화면 (주소: /) — 스킬투머니 강좌 목록
 import { useState } from "react";
 import { courses } from "@/data/courses";
+import ReservationModal from "./ReservationModal";
 
 export interface Course {
   id: string | number;
@@ -28,6 +29,8 @@ function getSeatStatus(remaining: number) {
 
 export default function Home() {
   const [onlyAvailable, setOnlyAvailable] = useState(false);
+  // 예약 창을 연 강좌 (null이면 창이 닫힌 상태)
+  const [selectedCourse, setSelectedCourse] = useState<Course | null>(null);
 
   // 체크 시 남은 좌석(정원 - 예약)이 1석 이상인 강좌만 필터링
   const displayedCourses = onlyAvailable
@@ -162,11 +165,12 @@ export default function Home() {
                         </p>
                       )}
 
-                      {/* 예약 버튼 (아직 연결된 예약 기능 없음). 마감이면 누를 수 없음 */}
+                      {/* 예약 버튼: 누르면 예약 신청 창이 열림. 마감이면 누를 수 없음 */}
                       <button
                         type="button"
                         id={`reserve-${course.id}`}
                         disabled={isSoldOut}
+                        onClick={() => setSelectedCourse(course)}
                         className="mt-8 h-12 w-full rounded-xl bg-gold font-bold text-[#0b1a3a] transition-colors enabled:hover:bg-gold-light focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold disabled:cursor-not-allowed disabled:bg-white/10 disabled:text-white/40"
                       >
                         {isSoldOut ? "예약 마감" : "예약하기"}
@@ -179,6 +183,16 @@ export default function Home() {
           )}
         </section>
       </div>
+
+      {/* 예약 신청 창 */}
+      {selectedCourse && (
+        <ReservationModal
+          courseName={selectedCourse.name}
+          date={selectedCourse.date}
+          maxPeople={selectedCourse.seat - selectedCourse.booked}
+          onClose={() => setSelectedCourse(null)}
+        />
+      )}
     </main>
   );
 }
